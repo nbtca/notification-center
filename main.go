@@ -20,6 +20,9 @@ var (
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin:     func(r *http.Request) bool { return true },
+		Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
+			log.Println("WebSocket error:", status, reason)
+		},
 	}
 )
 
