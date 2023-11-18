@@ -98,6 +98,7 @@ func loadConfig() {
 		log.Println("Read config file failed:", err)
 		//write default config
 		cfgbuf, err = json.MarshalIndent(Config{Bind: ":8080"}, "", "  ")
+		os.WriteFile(cfgPath, cfgbuf, 0644)
 		if err != nil {
 			log.Println("Write default config failed:", err)
 			return
