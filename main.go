@@ -54,22 +54,22 @@ func handleWs(c *gin.Context) {
 
 type GithubWebhookPost struct {
 	Headers map[string][]string `json:"headers"`
-	Body    string              `json:"body"`
+	Body    interface{}         `json:"body"`
 }
 
 // 处理webhook请求(POST)
 func handleWebhook(c *gin.Context) {
-	// var msg map[string]interface{}
-	// if err := c.ShouldBindJSON(&msg); err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
-	// raw, err := json.Marshal(msg)
-	raw, err := c.GetRawData()
-	if err != nil {
+	var body interface{}
+	if err := c.ShouldBindJSON(&body); err != nil {
 		log.Println(err)
 		return
 	}
+	// raw, err := json.Marshal(msg)
+	// raw, err := c.GetRawData()
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
 	headers := make(map[string][]string)
 	for k, v := range c.Request.Header {
 		headers[k] = v
@@ -77,7 +77,7 @@ func handleWebhook(c *gin.Context) {
 	go func() {
 		fulldata := GithubWebhookPost{
 			Headers: headers,
-			Body:    string(raw),
+			Body:    body,
 		}
 		jsonData, err := json.Marshal(fulldata)
 		if err != nil {
