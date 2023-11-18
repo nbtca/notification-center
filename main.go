@@ -17,9 +17,7 @@ var (
 	clients   = make(map[*websocket.Conn]bool) //已经链接的ws客户端
 	clientsMu sync.Mutex                       //客户端锁
 	upgrader  = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin:     func(r *http.Request) bool { return true },
+		CheckOrigin: func(r *http.Request) bool { return true },
 		Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
 			log.Println("WebSocket error:", status, reason)
 		},
@@ -83,7 +81,10 @@ func handleWebhook(c *gin.Context) {
 }
 
 type Config struct {
-	Bind string `json:"bind"` //绑定地址
+	Bind     string `json:"bind"`      //绑定地址
+	UseCert  bool   `json:"use_cert"`  //是否使用证书
+	CertFile string `json:"cert_file"` //证书文件
+	KeyFile  string `json:"key_file"`  //证书密钥文件
 }
 
 var cfg Config
@@ -100,7 +101,12 @@ func loadConfig() {
 	if err != nil {
 		log.Println("Read config file failed:", err)
 		//write default config
-		cfgbuf, err = json.MarshalIndent(Config{Bind: ":8080"}, "", "  ")
+		cfgbuf, err = json.MarshalIndent(Config{
+			Bind:     ":8080",
+			UseCert:  false,
+			CertFile: "fullchain.cer",
+			KeyFile:  "private.key",
+		}, "", "  ")
 		os.WriteFile(cfgPath, cfgbuf, 0644)
 		if err != nil {
 			log.Println("Write default config failed:", err)
@@ -122,5 +128,9 @@ func main() {
 	})
 	r.POST("/webhook", handleWebhook) //webhook服务
 	r.GET("/ws", handleWs)            //ws服务
-	r.Run(cfg.Bind)                   //启动服务
+	if cfg.UseCert {
+		r.RunTLS(cfg.Bind, cfg.CertFile, cfg.KeyFile) //启动服务
+	} else {
+		r.Run(cfg.Bind) //启动服务
+	}
 }
