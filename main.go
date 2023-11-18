@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -53,30 +54,31 @@ func ws(c *gin.Context) {
 }
 
 func webhook(c *gin.Context) {
-	var msg Message
-	c.ShouldBind(&msg)
-	if err := c.ShouldBindJSON(&msg); err != nil {
-		log.Println(err)
-		return
-	}
-	jsonData, err := json.Marshal(msg)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	clientsMu.Lock()
-	defer clientsMu.Unlock()
-
-	for client := range clients {
-		err := client.WriteMessage(websocket.TextMessage, jsonData)
-		if err != nil {
-			log.Println("Failed to send WebSocket message:", err)
-			client.Close()
-			delete(clients, client)
+	go func() {
+		var msg Message
+		if err := c.ShouldBindJSON(&msg); err != nil {
+			log.Println(err)
+			return
 		}
-	}
+		jsonData, err := json.Marshal(msg)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fmt.Println(string(jsonData))
 
+		clientsMu.Lock()
+		defer clientsMu.Unlock()
+
+		for client := range clients {
+			err := client.WriteMessage(websocket.TextMessage, jsonData)
+			if err != nil {
+				log.Println("Failed to send WebSocket message:", err)
+				client.Close()
+				delete(clients, client)
+			}
+		}
+	}()
 }
 
 func main() {
