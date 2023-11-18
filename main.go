@@ -30,13 +30,13 @@ func handleWsMessage(message []byte) {
 
 // 处理ws路径的请求
 func handleWs(c *gin.Context) {
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Println(err)
+		return
+	}
 	go func() {
-		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			log.Println(err)
-			return
-		}
 		clientsMu.Lock()
 		clients[conn] = true
 		clientsMu.Unlock()
