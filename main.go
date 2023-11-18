@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/gin-contrib/cors"
@@ -76,7 +78,39 @@ func handleWebhook(c *gin.Context) {
 		}
 	}()
 }
+
+type Config struct {
+	Bind string `json:"bind"` //绑定地址
+}
+
+var cfg Config
+
+func loadConfig() {
+	cfgPath := "config.json"
+	if len(os.Args) < 2 {
+		log.Println("No config file specified, using default config.json")
+	} else {
+		cfgPath = os.Args[1]
+		log.Println("Using config file:", cfgPath)
+	}
+	cfgbuf, err := os.ReadFile(cfgPath) //读取配置文件
+	if err != nil {
+		log.Println("Read config file failed:", err)
+		//write default config
+		cfgbuf, err = json.MarshalIndent(Config{Bind: ":8080"}, "", "  ")
+		if err != nil {
+			log.Println("Write default config failed:", err)
+			return
+		}
+	}
+	err = json.Unmarshal(cfgbuf, &cfg) //解析配置文件 反序列化json到结构体
+	if err != nil {
+		log.Println("Unmarshal config failed:", err)
+		return
+	}
+}
 func main() {
+	loadConfig()
 	r := gin.Default()
 	r.Use(cors.Default())             //跨域
 	r.GET("/", func(c *gin.Context) { //测试
@@ -84,5 +118,5 @@ func main() {
 	})
 	r.POST("/webhook", handleWebhook) //webhook服务
 	r.GET("/ws", handleWs)            //ws服务
-	r.Run(":8000")                    //启动服务
+	r.Run(cfg.Bind)                   //启动服务
 }
