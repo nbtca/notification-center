@@ -54,14 +54,14 @@ func handleWs(c *gin.Context) {
 
 // 处理webhook请求(POST)
 func handleWebhook(c *gin.Context) {
+	// var msg map[string]interface{}
+	// if err := c.ShouldBindJSON(&msg); err != nil {
+	// 	log.Println(err)
+	// 	return
+	// }
+	// jsonData, err := json.Marshal(msg)
+	jsonData, err := c.GetRawData()
 	go func() {
-		// var msg map[string]interface{}
-		// if err := c.ShouldBindJSON(&msg); err != nil {
-		// 	log.Println(err)
-		// 	return
-		// }
-		// jsonData, err := json.Marshal(msg)
-		jsonData, err := c.GetRawData()
 		if err != nil {
 			log.Println(err)
 			return
