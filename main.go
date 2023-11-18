@@ -12,11 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Message struct {
-	Data string `json:"data"`
-	// To be implemented
-}
-
 var (
 	clients   = make(map[*websocket.Conn]bool)
 	clientsMu sync.Mutex
@@ -55,7 +50,7 @@ func ws(c *gin.Context) {
 
 func webhook(c *gin.Context) {
 	go func() {
-		var msg Message
+		var msg map[string]interface{}
 		if err := c.ShouldBindJSON(&msg); err != nil {
 			log.Println(err)
 			return
@@ -65,7 +60,6 @@ func webhook(c *gin.Context) {
 			log.Println(err)
 			return
 		}
-		fmt.Println(string(jsonData))
 
 		clientsMu.Lock()
 		defer clientsMu.Unlock()
