@@ -64,12 +64,6 @@ func handleWebhook(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	// raw, err := json.Marshal(msg)
-	// raw, err := c.GetRawData()
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return
-	// }
 	headers := make(map[string][]string)
 	for k, v := range c.Request.Header {
 		headers[k] = v
