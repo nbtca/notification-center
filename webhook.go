@@ -10,7 +10,7 @@ import (
 
 func initWebhook(r *gin.Engine) {
 	// 注册路由
-	r.POST("/webhook/*path", handleWebhook) //webhook服务
+	r.POST("/*path", handleWebhook) //webhook服务
 }
 
 type GithubWebhookPost struct {
