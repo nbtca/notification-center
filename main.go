@@ -1,13 +1,25 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"runtime"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/nbtca/webhook-delivery-center/consolefixfunc"
 )
 
 func main() {
+	if runtime.GOOS == "windows" {
+		err := consolefixfunc.EnableANSIConsole()
+		if err != nil {
+			fmt.Println("Error enabling ANSI console:", err)
+			os.Exit(1)
+		}
+	}
+	gin.SetMode(gin.ReleaseMode)
 	loadConfig()
 	r := gin.Default()
 	r.Use(cors.Default())             //跨域
