@@ -20,7 +20,11 @@ func main() {
 		}
 	}
 	gin.SetMode(gin.ReleaseMode)
-	loadConfig()
+	err := loadConfig()
+	if err != nil {
+		fmt.Println("Error loading config:", err)
+		os.Exit(1)
+	}
 	r := gin.Default()
 	r.Use(cors.Default())             //跨域
 	r.GET("/", func(c *gin.Context) { //测试

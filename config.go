@@ -17,7 +17,7 @@ type Config struct {
 
 var cfg Config
 
-func loadConfig() {
+func loadConfig() error {
 	//get executable filename without extension
 	ex, err := os.Executable()
 	if err != nil {
@@ -47,10 +47,14 @@ func loadConfig() {
 				"": "token",
 			},
 		}, "", "  ")
-		os.WriteFile(cfgPath, cfgbuf, 0644)
+		if err != nil {
+			log.Println("Marshal default config failed:", err)
+			return err
+		}
+		err = os.WriteFile(cfgPath, cfgbuf, 0644)
 		if err != nil {
 			log.Println("Write default config failed:", err)
-			return
+			return err
 		}
 	}
 	err = json.Unmarshal(cfgbuf, &cfg) //解析配置文件 反序列化json到结构体
@@ -58,6 +62,9 @@ func loadConfig() {
 	//remove '/' in auth path
 	changed := false
 	for k, v := range cfg.AuthBearer {
+		if len(k) == 0 {
+			continue
+		}
 		if k[0] == '/' {
 			cfg.AuthBearer[k[1:]] = v
 			delete(cfg.AuthBearer, k)
@@ -71,6 +78,7 @@ func loadConfig() {
 	}
 	if err != nil {
 		log.Println("Unmarshal config failed:", err)
-		return
+		return err
 	}
+	return nil
 }
