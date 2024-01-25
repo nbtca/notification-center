@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
@@ -17,9 +18,18 @@ type Config struct {
 var cfg Config
 
 func loadConfig() {
-	cfgPath := "config.json"
+	//get executable filename without extension
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	name := filepath.Base(ex)
+	ext := filepath.Ext(name)
+	nameWithoutExt := name[0 : len(name)-len(ext)]
+	//get config file path
+	cfgPath := nameWithoutExt + ".config.json"
 	if len(os.Args) < 2 {
-		log.Println("No config file specified, using default config.json")
+		log.Println("No config file specified, using default config: ", cfgPath)
 	} else {
 		cfgPath = os.Args[1]
 		log.Println("Using config file:", cfgPath)
@@ -44,6 +54,21 @@ func loadConfig() {
 		}
 	}
 	err = json.Unmarshal(cfgbuf, &cfg) //解析配置文件 反序列化json到结构体
+	//check config
+	//remove '/' in auth path
+	changed := false
+	for k, v := range cfg.AuthBearer {
+		if k[0] == '/' {
+			cfg.AuthBearer[k[1:]] = v
+			delete(cfg.AuthBearer, k)
+			changed = true
+		}
+	}
+	if changed {
+		cfgbuf, err = json.MarshalIndent(cfg, "", "  ")
+		os.WriteFile(cfgPath, cfgbuf, 0644)
+		log.Println("Config file changed.")
+	}
 	if err != nil {
 		log.Println("Unmarshal config failed:", err)
 		return
