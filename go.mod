@@ -1,4 +1,4 @@
-module github.com/nbtca/github-webhook-bridge
+module github.com/nbtca/webhook-delivery-center
 
 go 1.20
 
