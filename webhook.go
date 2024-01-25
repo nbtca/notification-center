@@ -21,6 +21,12 @@ type GithubWebhookPost struct {
 
 // 处理webhook请求(POST)
 func handleWebhook(c *gin.Context) {
+	path := c.Param("path")[1:]
+	err := auth(c, &path) //鉴权
+	if err != nil {
+		log.Println("handleWebhook : Auth failed:", err)
+		return
+	}
 	var body interface{}
 	if err := c.ShouldBindJSON(&body); err != nil { //绑定内容json到结构体
 		log.Println(err)
@@ -30,7 +36,6 @@ func handleWebhook(c *gin.Context) {
 	for k, v := range c.Request.Header {
 		headers[k] = v
 	}
-	path := c.Param("path")[1:]
 	go func() {
 		fulldata := GithubWebhookPost{
 			Headers: headers, //请求头

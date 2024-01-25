@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	Bind     string `json:"bind"`      //绑定地址
-	UseCert  bool   `json:"use_cert"`  //是否使用证书
-	CertFile string `json:"cert_file"` //证书文件
-	KeyFile  string `json:"key_file"`  //证书密钥文件
+	Bind       string            `json:"bind"`      //绑定地址
+	UseCert    bool              `json:"use_cert"`  //是否使用证书
+	CertFile   string            `json:"cert_file"` //证书文件
+	KeyFile    string            `json:"key_file"`  //证书密钥文件
+	AuthBearer map[string]string `json:"auth"`      //鉴权 {path:token}
 }
 
 var cfg Config
@@ -32,6 +33,9 @@ func loadConfig() {
 			UseCert:  false,
 			CertFile: "fullchain.cer",
 			KeyFile:  "private.key",
+			AuthBearer: map[string]string{
+				"": "token",
+			},
 		}, "", "  ")
 		os.WriteFile(cfgPath, cfgbuf, 0644)
 		if err != nil {

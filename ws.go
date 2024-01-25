@@ -31,13 +31,18 @@ func handleWsMessage(message []byte) {
 
 // 处理ws路径的请求
 func handleWs(c *gin.Context) {
+	path := c.Param("path")[1:]
+	err := auth(c, &path) //鉴权
+	if err != nil {
+		log.Println("handleWs : Auth failed:", err)
+		return
+	}
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		log.Println(err)
 		return
 	}
-	path := c.Param("path")[1:]
 	go func() {
 		clientsMu.Lock()
 		clients[conn] = path
