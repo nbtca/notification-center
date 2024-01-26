@@ -18,7 +18,7 @@ func auth(c *gin.Context, body *[]byte, path *string) error {
 		if bearerOrHash == "" && body != nil { //hash method
 			bearerOrHash = c.GetHeader("X-Hub-Signature-256")
 			if bearerOrHash == "" {
-				bearerOrHash = c.GetHeader("Signature")
+				bearerOrHash = c.GetHeader("X-Signature-256")
 			}
 			if bearerOrHash == "" {
 				err := fmt.Errorf("auth failed, no token from client in path '%s'", *path)
