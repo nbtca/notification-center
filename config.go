@@ -8,11 +8,11 @@ import (
 )
 
 type Config struct {
-	Bind       string            `json:"bind"`      //绑定地址
-	UseCert    bool              `json:"use_cert"`  //是否使用证书
-	CertFile   string            `json:"cert_file"` //证书文件
-	KeyFile    string            `json:"key_file"`  //证书密钥文件
-	AuthBearer map[string]string `json:"auth"`      //鉴权 {path:token}
+	Bind     string            `json:"bind"`      //绑定地址
+	UseCert  bool              `json:"use_cert"`  //是否使用证书
+	CertFile string            `json:"cert_file"` //证书文件
+	KeyFile  string            `json:"key_file"`  //证书密钥文件
+	Auth     map[string]string `json:"auth"`      //鉴权 {path:token}
 }
 
 var cfg Config
@@ -43,7 +43,7 @@ func loadConfig() error {
 			UseCert:  false,
 			CertFile: "fullchain.cer",
 			KeyFile:  "private.key",
-			AuthBearer: map[string]string{
+			Auth: map[string]string{
 				"": "token",
 			},
 		}, "", "  ")
@@ -61,13 +61,13 @@ func loadConfig() error {
 	//check config
 	//remove '/' in auth path
 	changed := false
-	for k, v := range cfg.AuthBearer {
+	for k, v := range cfg.Auth {
 		if len(k) == 0 {
 			continue
 		}
 		if k[0] == '/' {
-			cfg.AuthBearer[k[1:]] = v
-			delete(cfg.AuthBearer, k)
+			cfg.Auth[k[1:]] = v
+			delete(cfg.Auth, k)
 			changed = true
 		}
 	}

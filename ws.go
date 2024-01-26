@@ -32,7 +32,7 @@ func handleWsMessage(message []byte) {
 // 处理ws路径的请求
 func handleWs(c *gin.Context) {
 	path := c.Param("path")[1:]
-	err := auth(c, &path) //鉴权
+	err := auth(c, nil, &path) //鉴权
 	if err != nil {
 		log.Println("handleWs : Auth failed:", err)
 		return

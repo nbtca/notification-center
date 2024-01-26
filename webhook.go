@@ -22,13 +22,19 @@ type GithubWebhookPost struct {
 // 处理webhook请求(POST)
 func handleWebhook(c *gin.Context) {
 	path := c.Param("path")[1:]
-	err := auth(c, &path) //鉴权
+	bodyData, err := c.GetRawData()
+	if err != nil {
+		err := fmt.Errorf("auth failed, get body failed in path '%s'", path)
+		c.AbortWithError(401, err)
+		return
+	}
+	err = auth(c, &bodyData, &path) //鉴权
 	if err != nil {
 		log.Println("handleWebhook : Auth failed:", err)
 		return
 	}
 	var body interface{}
-	if err := c.ShouldBindJSON(&body); err != nil { //绑定内容json到结构体
+	if err := json.Unmarshal(bodyData, &body); err != nil { //绑定内容json到结构体
 		log.Println(err)
 		return
 	}
