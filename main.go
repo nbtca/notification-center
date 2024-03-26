@@ -9,9 +9,14 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/nbtca/webhook-delivery-center/consolefixfunc"
+	"github.com/nbtca/webhook-delivery-center/consumer"
+	"github.com/nbtca/webhook-delivery-center/util"
 )
 
 func main() {
+	util.InitDialer()
+	consumer.InitConsumer()
+
 	if runtime.GOOS == "windows" {
 		err := consolefixfunc.EnableANSIConsole()
 		if err != nil {

@@ -22,3 +22,4 @@ go.work
 config.json
 webhook-delivery-center.config.json
 webhook.tar
+.env
