@@ -10,22 +10,21 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nbtca/webhook-delivery-center/consolefixfunc"
 	"github.com/nbtca/webhook-delivery-center/consumer"
+	"github.com/nbtca/webhook-delivery-center/router"
 	"github.com/nbtca/webhook-delivery-center/util"
 )
 
 func main() {
 	util.InitDialer()
 	consumer.InitConsumer()
-
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" { //修复控制台上色
 		err := consolefixfunc.EnableANSIConsole()
 		if err != nil {
 			fmt.Println("Error enabling ANSI console:", err)
-			os.Exit(1)
 		}
 	}
 	gin.SetMode(gin.ReleaseMode)
-	err := loadConfig()
+	err := util.LoadConfig()
 	if err != nil {
 		fmt.Println("Error loading config:", err)
 		os.Exit(1)
@@ -35,11 +34,11 @@ func main() {
 	r.GET("/", func(c *gin.Context) { //测试
 		c.String(http.StatusOK, "200 ok")
 	})
-	initWebhook(r)
-	initWs(r)
-	if cfg.UseCert {
-		r.RunTLS(cfg.Bind, cfg.CertFile, cfg.KeyFile) //启动服务
+	router.InitWebhook(r)
+	router.InitWs(r)
+	if util.Cfg.UseCert {
+		r.RunTLS(util.Cfg.Bind, util.Cfg.CertFile, util.Cfg.KeyFile) //启动服务
 	} else {
-		r.Run(cfg.Bind) //启动服务
+		r.Run(util.Cfg.Bind) //启动服务
 	}
 }

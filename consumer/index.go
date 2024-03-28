@@ -18,6 +18,7 @@ func (m *EventActionMessageHandler) HandleMessage(msg *nsq.Message) (err error) 
 	util.SendMessageViaMail("New Action", msg)
 	fmt.Printf("recv from %v, msg:%v\n", msg.NSQDAddress, string(msg.Body))
 	return
+
 }
 
 type LogMessageHandler struct {

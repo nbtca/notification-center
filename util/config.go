@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"encoding/json"
@@ -13,11 +13,16 @@ type Config struct {
 	CertFile string            `json:"cert_file"` //证书文件
 	KeyFile  string            `json:"key_file"`  //证书密钥文件
 	Auth     map[string]string `json:"auth"`      //鉴权 {path:token}
+	Nsq      struct {
+		Topic   string `json:"topic"`
+		Channel string `json:"channel"`
+		Address string `json:"address"`
+	} `json:"nsq"`
 }
 
-var cfg Config
+var Cfg Config
 
-func loadConfig() error {
+func LoadConfig() error {
 	//get executable filename without extension
 	ex, err := os.Executable()
 	if err != nil {
@@ -57,22 +62,22 @@ func loadConfig() error {
 			return err
 		}
 	}
-	err = json.Unmarshal(cfgbuf, &cfg) //解析配置文件 反序列化json到结构体
+	err = json.Unmarshal(cfgbuf, &Cfg) //解析配置文件 反序列化json到结构体
 	//check config
 	//remove '/' in auth path
 	changed := false
-	for k, v := range cfg.Auth {
+	for k, v := range Cfg.Auth {
 		if len(k) == 0 {
 			continue
 		}
 		if k[0] == '/' {
-			cfg.Auth[k[1:]] = v
-			delete(cfg.Auth, k)
+			Cfg.Auth[k[1:]] = v
+			delete(Cfg.Auth, k)
 			changed = true
 		}
 	}
 	if changed {
-		cfgbuf, err = json.MarshalIndent(cfg, "", "  ")
+		cfgbuf, err = json.MarshalIndent(Cfg, "", "  ")
 		os.WriteFile(cfgPath, cfgbuf, 0644)
 		log.Println("Config file changed.")
 	}

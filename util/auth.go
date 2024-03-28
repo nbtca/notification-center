@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"crypto/hmac"
@@ -10,9 +10,9 @@ import (
 )
 
 // 鉴权失败返回错误
-func auth(c *gin.Context, body *[]byte, path *string) error {
+func Auth(c *gin.Context, body *[]byte, path *string) error {
 	// 鉴权
-	verifyToken := cfg.Auth[*path]
+	verifyToken := Cfg.Auth[*path]
 	if verifyToken != "" {
 		bearerOrHash := c.GetHeader("Authorization")
 		if bearerOrHash == "" && body != nil { //hash method

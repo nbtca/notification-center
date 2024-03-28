@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
 	"encoding/json"
@@ -6,9 +6,10 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nbtca/webhook-delivery-center/util"
 )
 
-func initWebhook(r *gin.Engine) {
+func InitWebhook(r *gin.Engine) {
 	// 注册路由
 	r.POST("/*path", handleWebhook) //webhook服务
 }
@@ -28,7 +29,7 @@ func handleWebhook(c *gin.Context) {
 		c.AbortWithError(401, err)
 		return
 	}
-	err = auth(c, &bodyData, &path) //鉴权
+	err = util.Auth(c, &bodyData, &path) //鉴权
 	if err != nil {
 		log.Println("handleWebhook : Auth failed:", err)
 		return

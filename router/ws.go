@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
 	"log"
@@ -7,9 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/nbtca/webhook-delivery-center/util"
 )
 
-func initWs(r *gin.Engine) {
+func InitWs(r *gin.Engine) {
 	// 注册路由
 	r.GET("/ws/*path", handleWs) //ws服务
 }
@@ -32,7 +33,7 @@ func handleWsMessage(message []byte) {
 // 处理ws路径的请求
 func handleWs(c *gin.Context) {
 	path := c.Param("path")[1:]
-	err := auth(c, nil, &path) //鉴权
+	err := util.Auth(c, nil, &path) //鉴权
 	if err != nil {
 		log.Println("handleWs : Auth failed:", err)
 		return
