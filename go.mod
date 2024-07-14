@@ -1,4 +1,4 @@
-module github.com/nbtca/webhook-delivery-center
+module github.com/nbtca/notification-center
 
 go 1.20
 

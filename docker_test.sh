@@ -1,11 +1,11 @@
-# check if webhook_test is running
-if [ "$(docker ps -q -f name=webhook_test)" ]; then
-    docker stop webhook_test
+# check if notification-center_test is running
+if [ "$(docker ps -q -f name=notification-center_test)" ]; then
+    docker stop notification-center_test
 fi
-# remove webhook_test container if it exists
-if [ "$(docker ps -aq -f status=exited -f name=webhook_test)" ]; then
-    docker rm webhook_test
+# remove notification-center_test container if it exists
+if [ "$(docker ps -aq -f status=exited -f name=notification-center_test)" ]; then
+    docker rm notification-center_test
 fi
-# 将本地的 'webhook-delivery-center.config.json' 映射到容器内的 '/config/config.json'
-docker run -d -p 18080:8080 --name webhook_test -v $(pwd)/webhook-delivery-center.config.json:/config/config.json webhook
+# 将本地的 'notification-center.config.json' 映射到容器内的 '/config/config.json'
+docker run -d -p 18080:8080 --name notification-center_test -v $(pwd)/notification-center.config.json:/config/config.json notification-center
 

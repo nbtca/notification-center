@@ -20,6 +20,6 @@
 # Go workspace file
 go.work
 config.json
-webhook-delivery-center.config.json
-webhook.tar
+notification-center.config.json
+notification-center.tar
 .env

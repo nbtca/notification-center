@@ -8,10 +8,10 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/nbtca/webhook-delivery-center/consolefixfunc"
-	"github.com/nbtca/webhook-delivery-center/consumer"
-	"github.com/nbtca/webhook-delivery-center/router"
-	"github.com/nbtca/webhook-delivery-center/util"
+	"github.com/nbtca/notification-center/consolefixfunc"
+	"github.com/nbtca/notification-center/consumer"
+	"github.com/nbtca/notification-center/router"
+	"github.com/nbtca/notification-center/util"
 )
 
 func main() {

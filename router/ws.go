@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/nbtca/webhook-delivery-center/util"
+	"github.com/nbtca/notification-center/util"
 )
 
 func InitWs(r *gin.Engine) {

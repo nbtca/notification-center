@@ -1,9 +1,9 @@
-# webhook-delivery-center
+# notification-center
 
-webhook 转发中心
+消息事件转发中心
 
-- 在配置的端口监听 http(s)请求，用于接收 webhook 请求
-- 在配置的端口/ws 路径下监听 websocket 请求，连接到此 websocket 的客户端会收到转发自 webhook 的请求消息
+- 在配置的端口监听 http(s)请求，用于接收 http(webhook) 请求
+- 在配置的端口/ws 路径下监听 websocket 请求，连接到此 websocket 的客户端会收到转发自 http(webhook) 的请求消息
 
 ## 🚀 Deployment/部署
 
@@ -13,8 +13,8 @@ webhook 转发中心
 
   - 启动命令(参考)
     ```bash
-    touch webhook-delivery-center.config.json
-    docker run -d -p 8080:8080 --name webhook -v $(pwd)/webhook-delivery-center.config.json:/config/config.json webhook
+    touch notification-center.config.json
+    docker run -d -p 8080:8080 --name webhook -v $(pwd)/notification-center.config.json:/config/config.json webhook
     ```
 
 ## 🛠️ Config/配置
@@ -27,7 +27,7 @@ webhook 转发中心
   "key_file": "private.key",
   "auth": {
     "": "默认路径的密钥",
-    "github":"对于/github路径的请求使用的密钥"
+    "github": "对于/github路径的请求使用的密钥"
   }
 }
 ```

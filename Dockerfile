@@ -11,10 +11,9 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY *.go ./
-COPY consolefixfunc consolefixfunc
+COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /webhook
+RUN CGO_ENABLED=0 GOOS=linux go build -o /notification-center
 
 ##
 ## Run the tests in the container
@@ -31,9 +30,9 @@ FROM ubuntu AS build-release-stage
 
 WORKDIR /
 
-COPY --from=build-stage /webhook /webhook
+COPY --from=build-stage /notification-center /notification-center
 
 EXPOSE 18080
 
 # call wenhook with /config/config.json
-ENTRYPOINT ["/webhook","/config/config.json"]
+ENTRYPOINT ["/notification-center","/config/config.json"]

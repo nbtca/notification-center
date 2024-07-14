@@ -7,7 +7,7 @@ import (
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/nbtca/webhook-delivery-center/util"
+	"github.com/nbtca/notification-center/util"
 	"github.com/nsqio/go-nsq"
 )
 

@@ -1,6 +1,6 @@
 # build image
-docker build -t webhook .
+docker build -t notification-center .
 # export image
-docker save -o webhook.tar webhook
+docker save -o notification-center.tar notification-center
 # import image
-# docker load -i webhook.tar
+# docker load -i notification-center.tar

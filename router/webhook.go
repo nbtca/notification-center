@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nbtca/webhook-delivery-center/util"
+	"github.com/nbtca/notification-center/util"
 )
 
 func InitWebhook(r *gin.Engine) {
