@@ -19,4 +19,7 @@ jobs:
           port: ${{ secrets.REMOTE_PORT }}
           key: ${{ secrets.REMOTE_SSHKEY }}
           script: |
-            sh /home/nbtca/notification-center/reset.sh
+            cd /home/nbtca/docker/notification-center
+            docker compose pull
+            docker compose down
+            docker compose up -d

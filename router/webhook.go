@@ -55,6 +55,6 @@ func handleWebhook(c *gin.Context) {
 			return
 		}
 		fmt.Println(string(jsonData))
-		broadcastMessage(&path, jsonData) //广播消息
+		broadcastMessage(&path, jsonData, nil) //广播消息
 	}()
 }

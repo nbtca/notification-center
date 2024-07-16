@@ -7,8 +7,8 @@ on:
     branches: [ "main" ]
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: webhook
-  IMAGE_NAME_FULL: ghcr.io/nbtca/webhook
+  IMAGE_NAME: notification-center
+  IMAGE_NAME_FULL: ghcr.io/nbtca/notification-center
 
 jobs:
 

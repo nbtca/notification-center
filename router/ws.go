@@ -27,7 +27,10 @@ var (
 )
 
 // 从客户端收到消息
-func handleWsMessage(message []byte) {
+func handleWsMessage(conn *websocket.Conn, message []byte) {
+	// 转发消息给所有客户端
+	path := clients[conn]
+	broadcastMessage(&path, message, conn)
 }
 
 // 处理ws路径的请求
@@ -60,17 +63,20 @@ func handleWs(c *gin.Context) {
 			if err != nil {
 				break
 			}
-			handleWsMessage(message)
+			handleWsMessage(conn, message)
 		}
 
 	}()
 }
 
 // broadcast message to all clients 广播消息给所有客户端
-func broadcastMessage(path *string, message []byte) {
+func broadcastMessage(path *string, message []byte, excluedeConn *websocket.Conn) {
 	clientsMu.Lock()
 	defer clientsMu.Unlock()
 	for client := range clients {
+		if client == excluedeConn {
+			continue
+		}
 		// send to all if path is empty
 		// otherwise only send message to clients with same path
 		// and client whose path is empty will receive all messages
