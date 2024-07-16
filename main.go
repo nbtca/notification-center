@@ -8,15 +8,14 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/nbtca/notification-center/consolefixfunc"
-	"github.com/nbtca/notification-center/consumer"
 	"github.com/nbtca/notification-center/router"
 	"github.com/nbtca/notification-center/util"
+	"github.com/nbtca/notification-center/util/consolefixfunc"
 )
 
 func main() {
-	util.InitDialer()
-	consumer.InitConsumer()
+	// util.InitDialer()
+	// consumer.InitConsumer()
 	if runtime.GOOS == "windows" { //修复控制台上色
 		err := consolefixfunc.EnableANSIConsole()
 		if err != nil {

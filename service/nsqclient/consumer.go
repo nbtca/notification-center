@@ -1,4 +1,4 @@
-package consumer
+package nsqclient
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/nbtca/notification-center/util"
+	"github.com/nbtca/notification-center/service/mail"
 	"github.com/nsqio/go-nsq"
 )
 
@@ -15,7 +15,7 @@ type EventActionMessageHandler struct {
 }
 
 func (m *EventActionMessageHandler) HandleMessage(msg *nsq.Message) (err error) {
-	util.SendMessageViaMail("New Action", msg)
+	mail.SendMessageViaMail("New Action", msg)
 	fmt.Printf("recv from %v, msg:%v\n", msg.NSQDAddress, string(msg.Body))
 	return
 
@@ -25,7 +25,7 @@ type LogMessageHandler struct {
 }
 
 func (m *LogMessageHandler) HandleMessage(msg *nsq.Message) (err error) {
-	util.SendMessageViaMail("New Action", msg)
+	mail.SendMessageViaMail("New Action", msg)
 	fmt.Printf("recv from %v, msg:%v\n", msg.NSQDAddress, string(msg.Body))
 	return
 }

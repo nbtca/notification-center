@@ -14,9 +14,9 @@ type Config struct {
 	KeyFile  string            `json:"key_file"`  //证书密钥文件
 	Auth     map[string]string `json:"auth"`      //鉴权 {path:token}
 	Nsq      struct {
+		Address string `json:"address"`
 		Topic   string `json:"topic"`
 		Channel string `json:"channel"`
-		Address string `json:"address"`
 	} `json:"nsq"`
 }
 
