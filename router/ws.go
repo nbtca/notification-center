@@ -31,6 +31,8 @@ func handleWsMessage(conn *websocket.Conn, message []byte) {
 	// 转发消息给所有客户端
 	path := clients[conn]
 	broadcastMessage(&path, message, conn)
+	//print message
+	log.Println("ws received message from ", path, ":", string(message))
 }
 
 // 处理ws路径的请求
