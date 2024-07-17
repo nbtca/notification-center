@@ -41,3 +41,8 @@
   - 格式为`Bearer ${value}`，`${value}`为配置文件中`auth`字段中的`value`对应的值
 - ### Header["X-Signature-256"]
   - `SHA256`签名，用于验证请求的合法性，通过`auth`字段中的`value`作为 HMAC 的密钥，对请求的`body`进行签名，签名结果与请求头中的`X-Signature-256`进行比对，如果一致则请求合法，否则请求非法
+  
+## 🎉 Sample/示例
+`client A` 负责推送事件，使用POST请求发送到 `service_1`路径下(`POST https://xxx.xxx/service_1`)，`client B` 通过 websocket 连接到 (`POST wss://xxx.xxx/ws/service_1`)，此时`client B` 将收到 `client A` 推送的事件。
+
+
