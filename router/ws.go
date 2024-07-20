@@ -15,10 +15,15 @@ func InitWs(r *gin.Engine) {
 	r.GET("/ws/*path", handleWs) //ws服务
 }
 
+type ClientInfo struct {
+	path    string
+	headers map[string][]string
+}
+
 var (
-	clients   = make(map[*websocket.Conn]string) //已经链接的ws客户端，value是ws连接的路径
-	clientsMu sync.Mutex                         //客户互斥锁
-	upgrader  = websocket.Upgrader{              //升级ws请求用
+	clients   = make(map[*websocket.Conn]*ClientInfo) //已经链接的ws客户端，value是ws连接的路径
+	clientsMu sync.Mutex                              //客户互斥锁
+	upgrader  = websocket.Upgrader{                   //升级ws请求用
 		CheckOrigin: func(r *http.Request) bool { return true },
 		Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
 			log.Println("WebSocket error:", status, reason)
@@ -29,10 +34,13 @@ var (
 // 从客户端收到消息
 func handleWsMessage(conn *websocket.Conn, message []byte) {
 	// 转发消息给所有客户端
-	path := clients[conn]
-	broadcastMessage(&path, message, conn)
+	info := clients[conn]
+	if info == nil {
+		return
+	}
+	broadcastMessage(&info.path, message, conn)
 	//print message
-	log.Println("ws received message from ", path, ":", string(message))
+	log.Println("ws received message from ", info, ":", string(message))
 }
 
 // 处理ws路径的请求
@@ -49,17 +57,19 @@ func handleWs(c *gin.Context) {
 		log.Println(err)
 		return
 	}
+	headers := c.Request.Header
 	go func() {
 		clientsMu.Lock()
-		clients[conn] = path
+		clients[conn] = &ClientInfo{path: path, headers: headers}
 		clientsMu.Unlock()
+		broadcastActiveClientsChange()
 		defer func() { //出作用域删除客户端
 			clientsMu.Lock()
 			defer clientsMu.Unlock()
 			delete(clients, conn)
 			conn.Close()
+			broadcastActiveClientsChange()
 		}()
-
 		for { //循环读取ws消息
 			_, message, err := conn.ReadMessage()
 			if err != nil {
@@ -67,7 +77,6 @@ func handleWs(c *gin.Context) {
 			}
 			handleWsMessage(conn, message)
 		}
-
 	}()
 }
 
@@ -75,7 +84,7 @@ func handleWs(c *gin.Context) {
 func broadcastMessage(path *string, message []byte, excluedeConn *websocket.Conn) {
 	clientsMu.Lock()
 	defer clientsMu.Unlock()
-	for client := range clients {
+	for client, info := range clients {
 		if client == excluedeConn {
 			continue
 		}
@@ -85,18 +94,67 @@ func broadcastMessage(path *string, message []byte, excluedeConn *websocket.Conn
 		// 如果路径为空则发送给所有客户端
 		// 否则只发送给相同路径的客户端
 		// 路径为空的客户端将接收所有消息
-		if *path != "" {
-			if clients[client] != "" {
-				if clients[client] != *path {
-					continue
-				}
-			}
+		if *path != "" && info != nil && info.path != "" && info.path != *path {
+			continue
 		}
 		err := client.WriteMessage(websocket.TextMessage, message)
 		if err != nil { //disconnect client if failed to send message 发送消息失败则断开客户端
 			log.Println("Failed to send WebSocket message:", err)
-			client.Close()
 			delete(clients, client)
+			client.Close()
+			broadcastActiveClientsChange()
+		}
+	}
+}
+
+type PacketSourceInfo struct {
+	DisplayName string `json:"display_name"`
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+}
+type ActiveBroadcastPacketData struct {
+	Clients []ActiveBroadcastPacketDataClient `json:"clients"`
+}
+type ActiveBroadcastPacketDataClient struct {
+	Address string              `json:"address"`
+	Headers map[string][]string `json:"headers"`
+}
+
+type ActiveBroadcastPacket struct {
+	Type   string                    `json:"type"`
+	Source PacketSourceInfo          `json:"source"`
+	Data   ActiveBroadcastPacketData `json:"data"`
+}
+
+func broadcastActiveClientsChange() {
+	clientsMu.Lock()
+	defer clientsMu.Unlock()
+	pkt := &ActiveBroadcastPacket{
+		Type: "active_clients_change",
+		Source: PacketSourceInfo{
+			"notification-center",
+			"notification-center",
+			"1.0.0",
+		},
+		Data: ActiveBroadcastPacketData{
+			Clients: make([]ActiveBroadcastPacketDataClient, len(clients)),
+		},
+	}
+	index := 0
+	for client, info := range clients {
+		pkt.Data.Clients[index] = ActiveBroadcastPacketDataClient{
+			Address: client.RemoteAddr().String(),
+			Headers: info.headers,
+		}
+		index++
+	}
+	for client := range clients {
+		err := client.WriteJSON(pkt)
+		if err != nil {
+			log.Println("Failed to send WebSocket message:", err)
+			delete(clients, client)
+			client.Close()
+			broadcastActiveClientsChange()
 		}
 	}
 }

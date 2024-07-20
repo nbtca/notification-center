@@ -39,10 +39,7 @@ func handleWebhook(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	headers := make(map[string][]string)
-	for k, v := range c.Request.Header {
-		headers[k] = v
-	}
+	headers := c.Request.Header
 	go func() {
 		fulldata := GithubWebhookPost{
 			Headers: headers, //请求头
