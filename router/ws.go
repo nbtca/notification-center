@@ -62,6 +62,8 @@ func handleWs(c *gin.Context) {
 	delete(headers, "Authorization")
 	delete(headers, "Upgrade")
 	delete(headers, "Connection")
+	delete(headers, "Sec-Websocket-Key")
+	delete(headers, "Sec-Websocket-Version")
 	info := &ClientInfo{path: path, headers: headers}
 	go func() {
 		clientsMu.Lock()
