@@ -59,6 +59,9 @@ func handleWs(c *gin.Context) {
 		return
 	}
 	headers := c.Request.Header
+	delete(headers, "Authorization")
+	delete(headers, "Upgrade")
+	delete(headers, "Connection")
 	info := &ClientInfo{path: path, headers: headers}
 	go func() {
 		clientsMu.Lock()
@@ -80,8 +83,6 @@ func handleWs(c *gin.Context) {
 
 // broadcast message to all clients 广播消息给所有客户端
 func broadcastMessage(path *string, message []byte, excluedeConn *websocket.Conn) {
-	clientsMu.Lock()
-	defer clientsMu.Unlock()
 	for client, info := range clients {
 		if client == excluedeConn {
 			continue
@@ -126,8 +127,6 @@ type ActiveBroadcastPacket struct {
 }
 
 func broadcastActiveClientsChange(path *string) {
-	clientsMu.Lock()
-	defer clientsMu.Unlock()
 	pkt := &ActiveBroadcastPacket{
 		Type: "active_clients_change",
 		Source: PacketSourceInfo{
@@ -153,6 +152,7 @@ func broadcastActiveClientsChange(path *string) {
 		}
 		index++
 	}
+	log.Println("client count", len(clients), " for path ", *path)
 	for client, info := range clients {
 		if notSameCategory(path, info) {
 			continue
@@ -166,10 +166,12 @@ func broadcastActiveClientsChange(path *string) {
 }
 
 func disconnectClient(client *websocket.Conn, path *string) {
-	log.Println("disconnectClient", client, path)
-	clientsMu.Lock()
-	defer clientsMu.Unlock()
-	delete(clients, client)
-	client.Close()
+	func() {
+		log.Println("disconnectClient", client.RemoteAddr().String(), *path)
+		clientsMu.Lock()
+		defer clientsMu.Unlock()
+		delete(clients, client)
+		client.Close()
+	}()
 	broadcastActiveClientsChange(path)
 }
