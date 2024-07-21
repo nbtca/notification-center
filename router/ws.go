@@ -36,6 +36,7 @@ func handleWsMessage(conn *websocket.Conn, message []byte) {
 	// 转发消息给所有客户端
 	info := clients[conn]
 	if info == nil {
+		log.Println("handleWsMessage: client info not found"+conn.RemoteAddr().String(), conn)
 		return
 	}
 	broadcastMessage(&info.path, message, conn)
@@ -102,7 +103,7 @@ func notSameCategory(path *string, info *ClientInfo) bool {
 	// 如果路径为空则发送给所有客户端
 	// 否则只发送给相同路径的客户端
 	// 路径为空的客户端将接收所有消息
-	return *path != "" && info != nil && info.path != "" && info.path != *path
+	return *path != "" && (info == nil || (info.path != *path && info.path != ""))
 }
 
 type PacketSourceInfo struct {
@@ -165,6 +166,7 @@ func broadcastActiveClientsChange(path *string) {
 }
 
 func disconnectClient(client *websocket.Conn, path *string) {
+	log.Println("disconnectClient", client, path)
 	clientsMu.Lock()
 	defer clientsMu.Unlock()
 	delete(clients, client)
