@@ -58,17 +58,14 @@ func handleWs(c *gin.Context) {
 		return
 	}
 	headers := c.Request.Header
+	info := &ClientInfo{path: path, headers: headers}
 	go func() {
 		clientsMu.Lock()
-		clients[conn] = &ClientInfo{path: path, headers: headers}
+		clients[conn] = info
 		clientsMu.Unlock()
-		broadcastActiveClientsChange()
+		broadcastActiveClientsChange(&info.path)
 		defer func() { //出作用域删除客户端
-			clientsMu.Lock()
-			defer clientsMu.Unlock()
-			delete(clients, conn)
-			conn.Close()
-			broadcastActiveClientsChange()
+			disconnectClient(conn, &info.path)
 		}()
 		for { //循环读取ws消息
 			_, message, err := conn.ReadMessage()
@@ -88,23 +85,24 @@ func broadcastMessage(path *string, message []byte, excluedeConn *websocket.Conn
 		if client == excluedeConn {
 			continue
 		}
-		// send to all if path is empty
-		// otherwise only send message to clients with same path
-		// and client whose path is empty will receive all messages
-		// 如果路径为空则发送给所有客户端
-		// 否则只发送给相同路径的客户端
-		// 路径为空的客户端将接收所有消息
-		if *path != "" && info != nil && info.path != "" && info.path != *path {
+		if notSameCategory(path, info) {
 			continue
 		}
 		err := client.WriteMessage(websocket.TextMessage, message)
 		if err != nil { //disconnect client if failed to send message 发送消息失败则断开客户端
 			log.Println("Failed to send WebSocket message:", err)
-			delete(clients, client)
-			client.Close()
-			broadcastActiveClientsChange()
+			disconnectClient(client, &info.path)
 		}
 	}
+}
+func notSameCategory(path *string, info *ClientInfo) bool {
+	// send to all if path is empty
+	// otherwise only send message to clients with same path
+	// and client whose path is empty will receive all messages
+	// 如果路径为空则发送给所有客户端
+	// 否则只发送给相同路径的客户端
+	// 路径为空的客户端将接收所有消息
+	return *path != "" && info != nil && info.path != "" && info.path != *path
 }
 
 type PacketSourceInfo struct {
@@ -126,7 +124,7 @@ type ActiveBroadcastPacket struct {
 	Data   ActiveBroadcastPacketData `json:"data"`
 }
 
-func broadcastActiveClientsChange() {
+func broadcastActiveClientsChange(path *string) {
 	clientsMu.Lock()
 	defer clientsMu.Unlock()
 	pkt := &ActiveBroadcastPacket{
@@ -142,19 +140,34 @@ func broadcastActiveClientsChange() {
 	}
 	index := 0
 	for client, info := range clients {
+		if notSameCategory(path, info) {
+			continue
+		}
+		if *path != "" && info != nil && info.path != "" && info.path != *path {
+			continue
+		}
 		pkt.Data.Clients[index] = ActiveBroadcastPacketDataClient{
 			Address: client.RemoteAddr().String(),
 			Headers: info.headers,
 		}
 		index++
 	}
-	for client := range clients {
+	for client, info := range clients {
+		if notSameCategory(path, info) {
+			continue
+		}
 		err := client.WriteJSON(pkt)
 		if err != nil {
 			log.Println("Failed to send WebSocket message:", err)
-			delete(clients, client)
-			client.Close()
-			broadcastActiveClientsChange()
+			disconnectClient(client, &info.path)
 		}
 	}
+}
+
+func disconnectClient(client *websocket.Conn, path *string) {
+	clientsMu.Lock()
+	defer clientsMu.Unlock()
+	delete(clients, client)
+	client.Close()
+	broadcastActiveClientsChange(path)
 }
