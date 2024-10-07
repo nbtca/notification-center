@@ -137,7 +137,7 @@ func broadcastActiveClientsChange(path *string) {
 			"1.0.0",
 		},
 		Data: ActiveBroadcastPacketData{
-			Clients: make([]ActiveBroadcastPacketDataClient, len(clients)),
+			Clients: make([]ActiveBroadcastPacketDataClient, 0),
 		},
 	}
 	index := 0
@@ -148,10 +148,10 @@ func broadcastActiveClientsChange(path *string) {
 		if *path != "" && info != nil && info.path != "" && info.path != *path {
 			continue
 		}
-		pkt.Data.Clients[index] = ActiveBroadcastPacketDataClient{
+		pkt.Data.Clients = append(pkt.Data.Clients, ActiveBroadcastPacketDataClient{
 			Address: client.RemoteAddr().String(),
 			Headers: info.headers,
-		}
+		})
 		index++
 	}
 	log.Println("client count", len(clients), " for path ", *path)
