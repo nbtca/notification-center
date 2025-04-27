@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/nbtca/notification-center/service/zmqclient"
 	"github.com/nbtca/notification-center/util"
 )
 
@@ -85,6 +86,26 @@ func handleWs(c *gin.Context) {
 
 // broadcast message to all clients 广播消息给所有客户端
 func broadcastMessage(path *string, message []byte, excluedeConn *websocket.Conn) {
+	// 通过ZeroMQ发布消息
+	if util.Cfg.ZeroMQ.Enabled {
+		// 将path作为主题，消息内容作为消息体发布
+		topic := *path
+		if topic == "" {
+			topic = "global" // 如果路径为空，使用"global"作为默认主题
+		}
+
+		// 异步发布ZeroMQ消息
+		go func() {
+			err := zmqclient.PublishMessage(topic, string(message))
+			if err != nil {
+				log.Printf("通过ZeroMQ发布消息失败: %v", err)
+			} else {
+				log.Printf("已通过ZeroMQ发布消息，主题: %s", topic)
+			}
+		}()
+	}
+
+	// 继续通过WebSocket广播消息
 	for client, info := range clients {
 		if client == excluedeConn {
 			continue

@@ -1,0 +1,18 @@
+{
+  "bind": ":8080",
+  "use_cert": false,
+  "cert_file": "fullchain.cer",
+  "key_file": "private.key",
+  "auth": {
+    "github": "nbtca_github_17126334-0997-4ba7-bdfc-4ab505064ea5",
+    "mc": "nbtca_mc_36e22e9d-de98-4073-96b5-7053978ba760",
+    "mc_dev": "nbtca_mc_36e22e9d-de98-4073-96b5-7053978ba760",
+    "test": "test"
+  },
+  "zeromq": {
+    "enabled": true,
+    "pub_address": "tcp://0.0.0.0:8321",
+    "sub_address": "tcp://localhost:8321",
+    "pattern": ""
+  }
+}

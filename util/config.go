@@ -13,11 +13,12 @@ type Config struct {
 	CertFile string            `json:"cert_file"` //证书文件
 	KeyFile  string            `json:"key_file"`  //证书密钥文件
 	Auth     map[string]string `json:"auth"`      //鉴权 {path:token}
-	Nsq      struct {
-		Address string `json:"address"`
-		Topic   string `json:"topic"`
-		Channel string `json:"channel"`
-	} `json:"nsq"`
+	ZeroMQ   struct {
+		Enabled    bool   `json:"enabled"`     // 是否启用ZeroMQ
+		PubAddress string `json:"pub_address"` // 发布消息地址
+		SubAddress string `json:"sub_address"` // 订阅消息地址
+		Pattern    string `json:"pattern"`     // 消息模式 (PUB/SUB, REQ/REP, PUSH/PULL)
+	} `json:"zeromq"`
 }
 
 var Cfg Config
