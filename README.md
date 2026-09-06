@@ -1,5 +1,7 @@
 # notification-center
 
+职能已迁移到 https://github.com/nbtca/ServerlessMQ
+
 消息事件转发中心
 
 - 在配置的端口监听 http(s)请求，用于接收 http(webhook) 请求
